@@ -1,0 +1,79 @@
+services:
+  users-db:
+    image: postgres:17-alpine
+    container_name: users-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - users-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d users_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wallet-db:
+    image: postgres:17-alpine
+    container_name: wallet-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: wallet_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - wallet-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d wallet_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  users-service:
+    build:
+      context: ./users-service
+      dockerfile: Dockerfile
+    container_name: users-service
+    environment:
+      PORT: 3002
+      DATABASE_HOST: users-db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: users_db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      JWT_SECRET: ILIACHALLENGE
+      JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
+      WALLET_SERVICE_URL: http://wallet-service:3001
+    ports:
+      - '3002:3002'
+    depends_on:
+      users-db:
+        condition: service_healthy
+
+  wallet-service:
+    build:
+      context: ./wallet-service
+      dockerfile: Dockerfile
+    container_name: wallet-service
+    environment:
+      PORT: 3001
+      DATABASE_HOST: wallet-db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: wallet_db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      JWT_SECRET: ILIACHALLENGE
+      JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
+    ports:
+      - '3001:3001'
+    depends_on:
+      wallet-db:
+        condition: service_healthy
+
+volumes:
+  users-db-data:
+  wallet-db-data:
