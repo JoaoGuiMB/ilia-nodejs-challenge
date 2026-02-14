@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe, ExecutionContext } from '@nestjs/common';
 import request from 'supertest';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
@@ -8,6 +8,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserResponse } from '../interfaces/user-response.interface';
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 describe('UsersController (Integration)', () => {
   let app: INestApplication;
@@ -20,6 +21,14 @@ describe('UsersController (Integration)', () => {
     email: 'john.doe@example.com',
     created_at: new Date('2024-01-01'),
     updated_at: new Date('2024-01-01'),
+  };
+
+  const mockJwtAuthGuard = {
+    canActivate: (context: ExecutionContext) => {
+      const request = context.switchToHttp().getRequest();
+      request.user = { sub: mockUserResponse.id, email: mockUserResponse.email };
+      return true;
+    },
   };
 
   beforeEach(async () => {
@@ -40,7 +49,10 @@ describe('UsersController (Integration)', () => {
           useValue: usersService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue(mockJwtAuthGuard)
+      .compile();
 
     app = module.createNestApplication();
     app.useGlobalPipes(
