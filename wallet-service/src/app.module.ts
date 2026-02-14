@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { BalanceModule } from './modules/balance/balance.module';
 import { Transaction } from './modules/transactions/entities/transaction.entity';
 
 @Module({
@@ -27,7 +29,9 @@ import { Transaction } from './modules/transactions/entities/transaction.entity'
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),
+    AuthModule,
     TransactionsModule,
+    BalanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

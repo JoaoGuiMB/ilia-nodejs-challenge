@@ -5,6 +5,7 @@ import { Transaction } from './entities/transaction.entity';
 import {
   ITransactionsRepository,
   CreateTransactionData,
+  BalanceAggregation,
 } from './interfaces/transactions-repository.interface';
 import { TransactionType } from '../../common/types';
 
@@ -39,5 +40,15 @@ export class TransactionsRepository implements ITransactionsRepository {
 
   async findOne(id: string): Promise<Transaction | null> {
     return this.repository.findOne({ where: { id } });
+  }
+
+  async calculateBalanceByUserId(userId: string): Promise<BalanceAggregation[]> {
+    return this.repository
+      .createQueryBuilder('transaction')
+      .select('transaction.type', 'type')
+      .addSelect('SUM(transaction.amount)', 'total')
+      .where('transaction.userId = :userId', { userId })
+      .groupBy('transaction.type')
+      .getRawMany();
   }
 }

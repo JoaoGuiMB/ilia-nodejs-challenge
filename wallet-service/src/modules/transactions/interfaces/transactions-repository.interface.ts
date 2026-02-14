@@ -7,6 +7,11 @@ export interface CreateTransactionData {
   amount: number;
 }
 
+export interface BalanceAggregation {
+  type: TransactionType;
+  total: string;
+}
+
 export interface ITransactionsRepository {
   create(data: CreateTransactionData): Promise<Transaction>;
   findByUserId(userId: string): Promise<Transaction[]>;
@@ -15,6 +20,7 @@ export interface ITransactionsRepository {
     type: TransactionType,
   ): Promise<Transaction[]>;
   findOne(id: string): Promise<Transaction | null>;
+  calculateBalanceByUserId(userId: string): Promise<BalanceAggregation[]>;
 }
 
 export const TRANSACTIONS_REPOSITORY = Symbol('TRANSACTIONS_REPOSITORY');
