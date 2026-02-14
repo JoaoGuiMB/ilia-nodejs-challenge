@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BalanceModule } from './modules/balance/balance.module';
+import { HealthModule } from './modules/health/health.module';
 import { Transaction } from './modules/transactions/entities/transaction.entity';
 
 @Module({
@@ -32,6 +33,7 @@ import { Transaction } from './modules/transactions/entities/transaction.entity'
     AuthModule,
     TransactionsModule,
     BalanceModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

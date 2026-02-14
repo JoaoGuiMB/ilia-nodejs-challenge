@@ -26,6 +26,7 @@ describe('TransactionsService', () => {
       findByUserId: jest.fn(),
       findByUserIdAndType: jest.fn(),
       findOne: jest.fn(),
+      calculateBalanceByUserId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

@@ -5,10 +5,11 @@ import { TransactionsRepository } from './transactions.repository';
 import { TRANSACTIONS_REPOSITORY } from './interfaces/transactions-repository.interface';
 import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
+import { InternalTransactionsController } from './internal-transactions.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Transaction])],
-  controllers: [TransactionsController],
+  controllers: [TransactionsController, InternalTransactionsController],
   providers: [
     TransactionsRepository,
     {
