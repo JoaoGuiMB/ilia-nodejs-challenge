@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -18,6 +19,7 @@ interface TransactionFormProps {
 }
 
 export function TransactionForm({ onSuccess }: TransactionFormProps) {
+  const { t } = useTranslation()
   const { createTransaction, isLoading } = useCreateTransaction()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -49,7 +51,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
       onSuccess?.()
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create transaction')
+      setError(err instanceof Error ? err.message : t('transactions.createFailed'))
     }
   }
 
@@ -68,10 +70,10 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
         color="fg.default"
         mb={4}
       >
-        New Transaction
+        {t('transactions.newTransaction')}
       </Text>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} aria-label={t('transactions.newTransaction')}>
         <Stack gap={4}>
           {error && (
             <Box
@@ -80,6 +82,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
               borderRadius="md"
               borderWidth="1px"
               borderColor="red.200"
+              role="alert"
             >
               <Text color="red.600" fontSize="sm">
                 {error}
@@ -94,16 +97,18 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
               borderRadius="md"
               borderWidth="1px"
               borderColor="green.200"
+              role="status"
+              aria-live="polite"
             >
               <Text color="green.600" fontSize="sm">
-                Transaction created successfully!
+                {t('transactions.createSuccess')}
               </Text>
             </Box>
           )}
 
           <Field.Root invalid={!!errors.type}>
-            <Field.Label color="fg.default">Type</Field.Label>
-            <HStack gap={2}>
+            <Field.Label color="fg.default">{t('transactions.type')}</Field.Label>
+            <HStack gap={2} role="group" aria-label={t('accessibility.transactionType')}>
               <Button
                 type="button"
                 size={{ base: 'sm', md: 'md' }}
@@ -111,8 +116,9 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
                 variant={selectedType === 'CREDIT' ? 'solid' : 'outline'}
                 colorPalette={selectedType === 'CREDIT' ? 'green' : 'gray'}
                 onClick={() => setValue('type', 'CREDIT')}
+                aria-pressed={selectedType === 'CREDIT'}
               >
-                Credit (+)
+                {t('transactions.creditButton')}
               </Button>
               <Button
                 type="button"
@@ -121,8 +127,9 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
                 variant={selectedType === 'DEBIT' ? 'solid' : 'outline'}
                 colorPalette={selectedType === 'DEBIT' ? 'red' : 'gray'}
                 onClick={() => setValue('type', 'DEBIT')}
+                aria-pressed={selectedType === 'DEBIT'}
               >
-                Debit (-)
+                {t('transactions.debitButton')}
               </Button>
             </HStack>
             <input type="hidden" {...register('type')} />
@@ -132,18 +139,20 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
           </Field.Root>
 
           <Field.Root invalid={!!errors.amount}>
-            <Field.Label color="fg.default">Amount ($)</Field.Label>
+            <Field.Label color="fg.default" htmlFor="amount">{t('transactions.amount')}</Field.Label>
             <Input
+              id="amount"
               type="number"
               step="0.01"
               min="0.01"
-              placeholder="Enter amount"
+              placeholder={t('transactions.amountPlaceholder')}
               {...register('amount')}
               bg="bg.surface"
               borderColor="border.default"
+              aria-describedby={errors.amount ? 'amount-error' : undefined}
             />
             {errors.amount && (
-              <Field.ErrorText>{errors.amount.message}</Field.ErrorText>
+              <Field.ErrorText id="amount-error">{errors.amount.message}</Field.ErrorText>
             )}
           </Field.Root>
 
@@ -152,10 +161,10 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             colorPalette="blue"
             width="full"
             loading={isLoading}
-            loadingText="Creating..."
+            loadingText={t('transactions.creatingTransaction')}
             mt={2}
           >
-            Create Transaction
+            {t('transactions.createTransaction')}
           </Button>
         </Stack>
       </form>

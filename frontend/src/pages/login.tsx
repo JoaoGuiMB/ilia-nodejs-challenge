@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -16,6 +17,7 @@ import { loginSchema, type LoginFormData } from '@/schemas'
 import { useAuth } from '@/hooks/use-auth'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { login } = useAuth()
@@ -37,17 +39,17 @@ export function LoginPage() {
       await login(data)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+      setError(err instanceof Error ? err.message : t('auth.loginFailed'))
     }
   }
 
   return (
     <Box>
       <Heading as="h2" size="lg" textAlign="center" mb={6} color="fg.default">
-        Sign In
+        {t('auth.signIn')}
       </Heading>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} aria-label={t('auth.signIn')}>
         <Stack gap={4}>
           {error && (
             <Box
@@ -56,6 +58,7 @@ export function LoginPage() {
               borderRadius="md"
               borderWidth="1px"
               borderColor="red.200"
+              role="alert"
             >
               <Text color="red.600" fontSize="sm">
                 {error}
@@ -64,30 +67,34 @@ export function LoginPage() {
           )}
 
           <Field.Root invalid={!!errors.email}>
-            <Field.Label color="fg.default">Email</Field.Label>
+            <Field.Label color="fg.default" htmlFor="email">{t('auth.email')}</Field.Label>
             <Input
+              id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder={t('auth.emailPlaceholder')}
               {...register('email')}
               bg="bg.surface"
               borderColor="border.default"
+              aria-describedby={errors.email ? 'email-error' : undefined}
             />
             {errors.email && (
-              <Field.ErrorText>{errors.email.message}</Field.ErrorText>
+              <Field.ErrorText id="email-error">{errors.email.message}</Field.ErrorText>
             )}
           </Field.Root>
 
           <Field.Root invalid={!!errors.password}>
-            <Field.Label color="fg.default">Password</Field.Label>
+            <Field.Label color="fg.default" htmlFor="password">{t('auth.password')}</Field.Label>
             <Input
+              id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder={t('auth.passwordPlaceholder')}
               {...register('password')}
               bg="bg.surface"
               borderColor="border.default"
+              aria-describedby={errors.password ? 'password-error' : undefined}
             />
             {errors.password && (
-              <Field.ErrorText>{errors.password.message}</Field.ErrorText>
+              <Field.ErrorText id="password-error">{errors.password.message}</Field.ErrorText>
             )}
           </Field.Root>
 
@@ -96,18 +103,18 @@ export function LoginPage() {
             colorPalette="blue"
             width="full"
             loading={isSubmitting}
-            loadingText="Signing in..."
+            loadingText={t('auth.signingIn')}
             mt={2}
           >
-            Sign In
+            {t('auth.signInButton')}
           </Button>
         </Stack>
       </form>
 
       <Text textAlign="center" mt={6} color="fg.muted" fontSize="sm">
-        Don&apos;t have an account?{' '}
+        {t('auth.noAccount')}{' '}
         <Link asChild color="blue.500">
-          <RouterLink to="/register">Create one</RouterLink>
+          <RouterLink to="/register">{t('auth.createOne')}</RouterLink>
         </Link>
       </Text>
     </Box>

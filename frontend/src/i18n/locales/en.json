@@ -1,0 +1,87 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Try Again",
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "skipToContent": "Skip to main content"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signInButton": "Sign In",
+    "signingIn": "Signing in...",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "passwordHint": "At least 8 characters",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "John",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Doe",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "loginFailed": "Login failed. Please try again.",
+    "registerFailed": "Registration failed. Please try again."
+  },
+  "header": {
+    "appName": "FinTech Wallet",
+    "greeting": "Hello, {{name}}",
+    "tagline": "Manage your digital wallet with ease"
+  },
+  "dashboard": {
+    "welcomeBack": "Welcome back, {{name}}!",
+    "financialOverview": "Here's your financial overview",
+    "loadingBalance": "Loading your balance...",
+    "quickActions": "Quick Actions",
+    "addCredit": "+ Add Credit",
+    "addDebit": "- Add Debit",
+    "viewAllTransactions": "View All Transactions",
+    "currentBalance": "Current Balance"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "View and manage your transactions",
+    "transactionHistory": "Transaction History",
+    "loadingTransactions": "Loading transactions...",
+    "newTransaction": "New Transaction",
+    "quickTransaction": "Quick Transaction",
+    "credit": "Credit",
+    "debit": "Debit",
+    "creditButton": "Credit (+)",
+    "debitButton": "Debit (-)",
+    "type": "Type",
+    "amount": "Amount ($)",
+    "amountPlaceholder": "Enter amount",
+    "createTransaction": "Create Transaction",
+    "creatingTransaction": "Creating...",
+    "createSuccess": "Transaction created successfully!",
+    "createFailed": "Failed to create transaction",
+    "filterAll": "All",
+    "filterCredit": "Credit",
+    "filterDebit": "Debit",
+    "noTransactions": "No transactions yet",
+    "noTransactionsDescription": "Create your first transaction to get started tracking your finances."
+  },
+  "accessibility": {
+    "toggleTheme": "Toggle color mode",
+    "selectLanguage": "Select language",
+    "closeModal": "Close modal",
+    "transactionType": "Transaction type",
+    "filterTransactions": "Filter transactions",
+    "mainNavigation": "Main navigation"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "retry": "Tentar Novamente",
+    "cancel": "Cancelar",
+    "create": "Criar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "close": "Fechar",
+    "skipToContent": "Pular para o conteudo principal"
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "transactions": "Transacoes"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "signInButton": "Entrar",
+    "signingIn": "Entrando...",
+    "createAccount": "Criar Conta",
+    "creatingAccount": "Criando conta...",
+    "email": "E-mail",
+    "emailPlaceholder": "Digite seu e-mail",
+    "password": "Senha",
+    "passwordPlaceholder": "Digite sua senha",
+    "passwordHint": "Minimo de 8 caracteres",
+    "firstName": "Nome",
+    "firstNamePlaceholder": "Joao",
+    "lastName": "Sobrenome",
+    "lastNamePlaceholder": "Silva",
+    "noAccount": "Nao tem uma conta?",
+    "createOne": "Criar uma",
+    "haveAccount": "Ja tem uma conta?",
+    "signInLink": "Entrar",
+    "loginFailed": "Falha no login. Por favor, tente novamente.",
+    "registerFailed": "Falha no cadastro. Por favor, tente novamente."
+  },
+  "header": {
+    "appName": "FinTech Wallet",
+    "greeting": "Ola, {{name}}",
+    "tagline": "Gerencie sua carteira digital com facilidade"
+  },
+  "dashboard": {
+    "welcomeBack": "Bem-vindo de volta, {{name}}!",
+    "financialOverview": "Aqui esta seu resumo financeiro",
+    "loadingBalance": "Carregando seu saldo...",
+    "quickActions": "Acoes Rapidas",
+    "addCredit": "+ Adicionar Credito",
+    "addDebit": "- Adicionar Debito",
+    "viewAllTransactions": "Ver Todas as Transacoes",
+    "currentBalance": "Saldo Atual"
+  },
+  "transactions": {
+    "title": "Transacoes",
+    "subtitle": "Visualize e gerencie suas transacoes",
+    "transactionHistory": "Historico de Transacoes",
+    "loadingTransactions": "Carregando transacoes...",
+    "newTransaction": "Nova Transacao",
+    "quickTransaction": "Transacao Rapida",
+    "credit": "Credito",
+    "debit": "Debito",
+    "creditButton": "Credito (+)",
+    "debitButton": "Debito (-)",
+    "type": "Tipo",
+    "amount": "Valor (R$)",
+    "amountPlaceholder": "Digite o valor",
+    "createTransaction": "Criar Transacao",
+    "creatingTransaction": "Criando...",
+    "createSuccess": "Transacao criada com sucesso!",
+    "createFailed": "Falha ao criar transacao",
+    "filterAll": "Todas",
+    "filterCredit": "Credito",
+    "filterDebit": "Debito",
+    "noTransactions": "Nenhuma transacao ainda",
+    "noTransactionsDescription": "Crie sua primeira transacao para comecar a acompanhar suas financas."
+  },
+  "accessibility": {
+    "toggleTheme": "Alternar modo de cor",
+    "selectLanguage": "Selecionar idioma",
+    "closeModal": "Fechar modal",
+    "transactionType": "Tipo de transacao",
+    "filterTransactions": "Filtrar transacoes",
+    "mainNavigation": "Navegacao principal"
+  }
+}

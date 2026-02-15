@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { HStack, Button, Box } from '@chakra-ui/react'
 import { NavLink, useLocation } from 'react-router-dom'
 
@@ -17,6 +18,7 @@ function NavItem({ to, children }: NavItemProps) {
       variant={isActive ? 'solid' : 'ghost'}
       colorPalette={isActive ? 'blue' : 'gray'}
       size={{ base: 'sm', md: 'md' }}
+      aria-current={isActive ? 'page' : undefined}
     >
       {children}
     </Button>
@@ -24,11 +26,13 @@ function NavItem({ to, children }: NavItemProps) {
 }
 
 export function Navigation() {
+  const { t } = useTranslation()
+
   return (
-    <Box as="nav">
+    <Box as="nav" aria-label={t('accessibility.mainNavigation')}>
       <HStack gap={{ base: 1, md: 2 }}>
-        <NavItem to="/dashboard">Dashboard</NavItem>
-        <NavItem to="/transactions">Transactions</NavItem>
+        <NavItem to="/dashboard">{t('nav.dashboard')}</NavItem>
+        <NavItem to="/transactions">{t('nav.transactions')}</NavItem>
       </HStack>
     </Box>
   )

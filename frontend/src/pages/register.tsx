@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -16,6 +17,7 @@ import { createUserSchema, type CreateUserFormData } from '@/schemas'
 import { usersApi } from '@/services/api'
 
 export function RegisterPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
 
@@ -33,17 +35,17 @@ export function RegisterPage() {
       await usersApi.register(data)
       navigate('/login', { state: { registered: true } })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+      setError(err instanceof Error ? err.message : t('auth.registerFailed'))
     }
   }
 
   return (
     <Box>
       <Heading as="h2" size="lg" textAlign="center" mb={6} color="fg.default">
-        Create Account
+        {t('auth.createAccount')}
       </Heading>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} aria-label={t('auth.createAccount')}>
         <Stack gap={4}>
           {error && (
             <Box
@@ -52,6 +54,7 @@ export function RegisterPage() {
               borderRadius="md"
               borderWidth="1px"
               borderColor="red.200"
+              role="alert"
             >
               <Text color="red.600" fontSize="sm">
                 {error}
@@ -61,59 +64,67 @@ export function RegisterPage() {
 
           <Stack direction={{ base: 'column', sm: 'row' }} gap={4}>
             <Field.Root invalid={!!errors.first_name} flex={1}>
-              <Field.Label color="fg.default">First Name</Field.Label>
+              <Field.Label color="fg.default" htmlFor="first_name">{t('auth.firstName')}</Field.Label>
               <Input
+                id="first_name"
                 type="text"
-                placeholder="John"
+                placeholder={t('auth.firstNamePlaceholder')}
                 {...register('first_name')}
                 bg="bg.surface"
                 borderColor="border.default"
+                aria-describedby={errors.first_name ? 'first_name-error' : undefined}
               />
               {errors.first_name && (
-                <Field.ErrorText>{errors.first_name.message}</Field.ErrorText>
+                <Field.ErrorText id="first_name-error">{errors.first_name.message}</Field.ErrorText>
               )}
             </Field.Root>
 
             <Field.Root invalid={!!errors.last_name} flex={1}>
-              <Field.Label color="fg.default">Last Name</Field.Label>
+              <Field.Label color="fg.default" htmlFor="last_name">{t('auth.lastName')}</Field.Label>
               <Input
+                id="last_name"
                 type="text"
-                placeholder="Doe"
+                placeholder={t('auth.lastNamePlaceholder')}
                 {...register('last_name')}
                 bg="bg.surface"
                 borderColor="border.default"
+                aria-describedby={errors.last_name ? 'last_name-error' : undefined}
               />
               {errors.last_name && (
-                <Field.ErrorText>{errors.last_name.message}</Field.ErrorText>
+                <Field.ErrorText id="last_name-error">{errors.last_name.message}</Field.ErrorText>
               )}
             </Field.Root>
           </Stack>
 
           <Field.Root invalid={!!errors.email}>
-            <Field.Label color="fg.default">Email</Field.Label>
+            <Field.Label color="fg.default" htmlFor="email">{t('auth.email')}</Field.Label>
             <Input
+              id="email"
               type="email"
               placeholder="john.doe@example.com"
               {...register('email')}
               bg="bg.surface"
               borderColor="border.default"
+              aria-describedby={errors.email ? 'email-error' : undefined}
             />
             {errors.email && (
-              <Field.ErrorText>{errors.email.message}</Field.ErrorText>
+              <Field.ErrorText id="email-error">{errors.email.message}</Field.ErrorText>
             )}
           </Field.Root>
 
           <Field.Root invalid={!!errors.password}>
-            <Field.Label color="fg.default">Password</Field.Label>
+            <Field.Label color="fg.default" htmlFor="password">{t('auth.password')}</Field.Label>
             <Input
+              id="password"
               type="password"
-              placeholder="At least 8 characters"
+              placeholder={t('auth.passwordHint')}
               {...register('password')}
               bg="bg.surface"
               borderColor="border.default"
+              aria-describedby={errors.password ? 'password-error' : undefined}
             />
             {errors.password && (
-              <Field.ErrorText>{errors.password.message}</Field.ErrorText>
+              <Field.ErrorText id="password-error">{errors.password.message}</Field.ErrorText>
             )}
           </Field.Root>
 
@@ -122,18 +133,18 @@ export function RegisterPage() {
             colorPalette="blue"
             width="full"
             loading={isSubmitting}
-            loadingText="Creating account..."
+            loadingText={t('auth.creatingAccount')}
             mt={2}
           >
-            Create Account
+            {t('auth.createAccount')}
           </Button>
         </Stack>
       </form>
 
       <Text textAlign="center" mt={6} color="fg.muted" fontSize="sm">
-        Already have an account?{' '}
+        {t('auth.haveAccount')}{' '}
         <Link asChild color="blue.500">
-          <RouterLink to="/login">Sign in</RouterLink>
+          <RouterLink to="/login">{t('auth.signInLink')}</RouterLink>
         </Link>
       </Text>
     </Box>

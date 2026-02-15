@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Alert, Button, VStack, Text } from '@chakra-ui/react'
 
 interface ErrorMessageProps {
@@ -6,11 +7,13 @@ interface ErrorMessageProps {
 }
 
 export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
+  const { t } = useTranslation()
+
   return (
-    <Alert.Root status="error" borderRadius="md">
+    <Alert.Root status="error" borderRadius="md" role="alert">
       <Alert.Indicator />
       <VStack align="start" gap={2} flex={1}>
-        <Alert.Title>Error</Alert.Title>
+        <Alert.Title>{t('common.error')}</Alert.Title>
         <Text fontSize="sm">{message}</Text>
         {onRetry && (
           <Button
@@ -19,7 +22,7 @@ export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
             colorPalette="red"
             onClick={onRetry}
           >
-            Try Again
+            {t('common.retry')}
           </Button>
         )}
       </VStack>

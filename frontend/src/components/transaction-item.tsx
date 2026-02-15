@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Box, HStack, Text, VStack } from '@chakra-ui/react'
 import { formatCurrency } from '@/utils/format-currency'
 
@@ -7,9 +8,9 @@ interface TransactionItemProps {
   date: string;
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string, locale: string): string {
   const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -19,9 +20,11 @@ function formatDate(dateString: string): string {
 }
 
 export function TransactionItem({ type, amount, date }: TransactionItemProps) {
+  const { t, i18n } = useTranslation()
   const isCredit = type === 'CREDIT'
   const sign = isCredit ? '+' : '-'
   const colorScheme = isCredit ? 'green' : 'red'
+  const typeLabel = isCredit ? t('transactions.credit') : t('transactions.debit')
 
   return (
     <Box
@@ -36,6 +39,8 @@ export function TransactionItem({ type, amount, date }: TransactionItemProps) {
         borderColor: `${colorScheme}.300`,
         shadow: 'sm',
       }}
+      role="article"
+      aria-label={`${typeLabel} ${sign}${formatCurrency(amount)}`}
     >
       <HStack justify="space-between" align="center">
         <VStack align="start" gap={1}>
@@ -49,6 +54,7 @@ export function TransactionItem({ type, amount, date }: TransactionItemProps) {
               alignItems="center"
               justifyContent="center"
               fontSize={{ base: 'md', md: 'lg' }}
+              aria-hidden="true"
             >
               {isCredit ? '↑' : '↓'}
             </Box>
@@ -57,7 +63,7 @@ export function TransactionItem({ type, amount, date }: TransactionItemProps) {
               fontWeight="medium"
               color="fg.default"
             >
-              {isCredit ? 'Credit' : 'Debit'}
+              {typeLabel}
             </Text>
           </HStack>
           <Text
@@ -65,7 +71,7 @@ export function TransactionItem({ type, amount, date }: TransactionItemProps) {
             color="fg.muted"
             pl={{ base: 10, md: 12 }}
           >
-            {formatDate(date)}
+            {formatDate(date, i18n.language)}
           </Text>
         </VStack>
 
