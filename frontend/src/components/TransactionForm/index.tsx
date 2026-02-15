@@ -148,7 +148,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
               step="0.01"
               min="0.01"
               placeholder={t('transactions.amountPlaceholder')}
-              {...register('amount')}
+              {...register('amount', { valueAsNumber: true })}
               bg="bg.surface"
               borderColor="border.default"
               aria-describedby={errors.amount ? 'amount-error' : undefined}

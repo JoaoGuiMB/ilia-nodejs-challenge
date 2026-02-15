@@ -23,11 +23,6 @@ describe('LoadingSpinner', () => {
   it('should render a spinner element', () => {
     const { container } = renderWithChakra(<LoadingSpinner />)
 
-    // Chakra UI Spinner renders with specific CSS animations
-    const spinnerElement = container.querySelector('[class*="chakra-spinner"]') ||
-      container.querySelector('span[class*="animation"]') ||
-      container.querySelector('[data-part="root"]')
-
     // At minimum, verify the component renders its container
     expect(container.firstChild).toBeInTheDocument()
   })
