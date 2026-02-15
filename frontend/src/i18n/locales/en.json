@@ -74,7 +74,8 @@
     "filterCredit": "Credit",
     "filterDebit": "Debit",
     "noTransactions": "No transactions yet",
-    "noTransactionsDescription": "Create your first transaction to get started tracking your finances."
+    "noTransactionsDescription": "Create your first transaction to get started tracking your finances.",
+    "loadingMore": "Loading more transactions..."
   },
   "accessibility": {
     "toggleTheme": "Toggle color mode",

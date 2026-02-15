@@ -27,7 +27,15 @@ import { translateError } from "@/utils/translate-error";
 export function TransactionsPage() {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterType>("ALL");
-  const { transactions, isLoading, error, refetch } = useTransactions(filter);
+  const {
+    transactions,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    error,
+    fetchNextPage,
+    refetch,
+  } = useTransactions(filter);
   const {
     balance,
     isLoading: isBalanceLoading,
@@ -106,7 +114,12 @@ export function TransactionsPage() {
               )}
 
               {!isLoading && !error && (
-                <TransactionList transactions={transactions} />
+                <TransactionList
+                  transactions={transactions}
+                  hasNextPage={hasNextPage}
+                  isFetchingNextPage={isFetchingNextPage}
+                  onLoadMore={fetchNextPage}
+                />
               )}
             </VStack>
           </GridItem>

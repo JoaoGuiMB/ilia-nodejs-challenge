@@ -8,6 +8,7 @@ import { AuthModule } from '../../auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TransactionType } from '../../../common/types';
 import { TransactionResponse } from '../interfaces/transaction-response.interface';
+import { PaginatedResponse } from '../interfaces/paginated-response.interface';
 
 describe('TransactionsController (Integration)', () => {
   let app: INestApplication;
@@ -25,10 +26,22 @@ describe('TransactionsController (Integration)', () => {
     created_at: '2024-01-01T00:00:00.000Z',
   };
 
+  const mockPaginatedResponse: PaginatedResponse<TransactionResponse> = {
+    data: [mockTransactionResponse],
+    meta: {
+      page: 1,
+      limit: 8,
+      total: 1,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+
   beforeAll(async () => {
     mockTransactionsService = {
       create: jest.fn().mockResolvedValue(mockTransactionResponse),
-      findAllByUser: jest.fn().mockResolvedValue([mockTransactionResponse]),
+      findAllByUser: jest.fn().mockResolvedValue(mockPaginatedResponse),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -177,7 +190,7 @@ describe('TransactionsController (Integration)', () => {
       await request(app.getHttpServer()).get('/transactions').expect(401);
     });
 
-    it('should return user transactions with valid token', async () => {
+    it('should return paginated user transactions with valid token', async () => {
       const response = await request(app.getHttpServer())
         .get('/transactions')
         .set('Authorization', `Bearer ${validToken}`)
@@ -187,18 +200,36 @@ describe('TransactionsController (Integration)', () => {
         mockUserId,
         expect.any(Object),
       );
-      expect(response.body).toEqual([mockTransactionResponse]);
+      expect(response.body).toEqual(mockPaginatedResponse);
+      expect(response.body.data).toEqual([mockTransactionResponse]);
+      expect(response.body.meta).toBeDefined();
     });
 
-    it('should filter by CREDIT type', async () => {
+    it('should accept pagination parameters', async () => {
       await request(app.getHttpServer())
-        .get('/transactions?type=CREDIT')
+        .get('/transactions?page=2&limit=8')
         .set('Authorization', `Bearer ${validToken}`)
         .expect(200);
 
       expect(mockTransactionsService.findAllByUser).toHaveBeenCalledWith(
         mockUserId,
-        expect.objectContaining({ type: TransactionType.CREDIT }),
+        expect.objectContaining({ page: 2, limit: 8 }),
+      );
+    });
+
+    it('should filter by CREDIT type with pagination', async () => {
+      await request(app.getHttpServer())
+        .get('/transactions?type=CREDIT&page=1&limit=8')
+        .set('Authorization', `Bearer ${validToken}`)
+        .expect(200);
+
+      expect(mockTransactionsService.findAllByUser).toHaveBeenCalledWith(
+        mockUserId,
+        expect.objectContaining({
+          type: TransactionType.CREDIT,
+          page: 1,
+          limit: 8,
+        }),
       );
     });
 
@@ -214,16 +245,27 @@ describe('TransactionsController (Integration)', () => {
       );
     });
 
-    it('should ignore invalid type filter', async () => {
+    it('should reject invalid type filter', async () => {
       await request(app.getHttpServer())
         .get('/transactions?type=INVALID')
         .set('Authorization', `Bearer ${validToken}`)
         .expect(400);
     });
 
-    it('should return empty array when no transactions', async () => {
+    it('should return empty data array when no transactions', async () => {
+      const emptyPaginatedResponse: PaginatedResponse<TransactionResponse> = {
+        data: [],
+        meta: {
+          page: 1,
+          limit: 8,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
       (mockTransactionsService.findAllByUser as jest.Mock).mockResolvedValueOnce(
-        [],
+        emptyPaginatedResponse,
       );
 
       const response = await request(app.getHttpServer())
@@ -231,7 +273,22 @@ describe('TransactionsController (Integration)', () => {
         .set('Authorization', `Bearer ${validToken}`)
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.data).toEqual([]);
+      expect(response.body.meta.total).toBe(0);
+    });
+
+    it('should reject invalid page parameter', async () => {
+      await request(app.getHttpServer())
+        .get('/transactions?page=0')
+        .set('Authorization', `Bearer ${validToken}`)
+        .expect(400);
+    });
+
+    it('should reject invalid limit parameter', async () => {
+      await request(app.getHttpServer())
+        .get('/transactions?limit=0')
+        .set('Authorization', `Bearer ${validToken}`)
+        .expect(400);
     });
   });
 });

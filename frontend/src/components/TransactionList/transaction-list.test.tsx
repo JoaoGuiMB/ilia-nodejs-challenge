@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { TransactionList } from '.'
@@ -76,5 +76,45 @@ describe('TransactionList', () => {
     expect(screen.getByText('+$100.00')).toBeInTheDocument()
     expect(screen.getByText('+$200.00')).toBeInTheDocument()
     expect(screen.getByText('-$75.00')).toBeInTheDocument()
+  })
+
+  it('should show loading spinner when fetching next page', () => {
+    renderWithProviders(
+      <TransactionList
+        transactions={mockTransactions}
+        isFetchingNextPage={true}
+        hasNextPage={true}
+        onLoadMore={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(screen.getByText('Loading more transactions...')).toBeInTheDocument()
+  })
+
+  it('should not show loading spinner when not fetching', () => {
+    renderWithProviders(
+      <TransactionList
+        transactions={mockTransactions}
+        isFetchingNextPage={false}
+        hasNextPage={true}
+        onLoadMore={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('should not show loading spinner when no more pages', () => {
+    renderWithProviders(
+      <TransactionList
+        transactions={mockTransactions}
+        isFetchingNextPage={false}
+        hasNextPage={false}
+        onLoadMore={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 })

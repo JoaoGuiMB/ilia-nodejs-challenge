@@ -12,13 +12,27 @@ export interface BalanceAggregation {
   total: string;
 }
 
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+}
+
 export interface ITransactionsRepository {
   create(data: CreateTransactionData): Promise<Transaction>;
-  findByUserId(userId: string): Promise<Transaction[]>;
+  findByUserId(
+    userId: string,
+    pagination: PaginationParams,
+  ): Promise<PaginatedResult<Transaction>>;
   findByUserIdAndType(
     userId: string,
     type: TransactionType,
-  ): Promise<Transaction[]>;
+    pagination: PaginationParams,
+  ): Promise<PaginatedResult<Transaction>>;
   findOne(id: string): Promise<Transaction | null>;
   calculateBalanceByUserId(userId: string): Promise<BalanceAggregation[]>;
 }

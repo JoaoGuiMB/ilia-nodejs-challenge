@@ -5,11 +5,9 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { TransactionsPage } from '.'
+import type { PaginatedResponse, TransactionResponse } from '@/types'
 
 const mockFetch = vi.fn()
-
-const TRANSACTIONS_URL = 'http://localhost:3001/transactions'
-const BALANCE_URL = 'http://localhost:3001/balance'
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -32,7 +30,7 @@ function createWrapper() {
   }
 }
 
-const mockTransactions = [
+const mockTransactions: TransactionResponse[] = [
   {
     id: '1',
     user_id: 'user-1',
@@ -58,8 +56,29 @@ const mockTransactions = [
 
 const mockBalanceResponse = { amount: 250 }
 
+function createPaginatedResponse(
+  data: TransactionResponse[],
+  page = 1,
+  total?: number,
+  limit = 8
+): PaginatedResponse<TransactionResponse> {
+  const actualTotal = total ?? data.length
+  const totalPages = Math.ceil(actualTotal / limit)
+  return {
+    data,
+    meta: {
+      page,
+      limit,
+      total: actualTotal,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  }
+}
+
 function setupMockFetch(options: {
-  transactions?: typeof mockTransactions | [];
+  transactions?: TransactionResponse[];
   balance?: { amount: number };
   transactionError?: boolean;
   balanceError?: boolean;
@@ -96,7 +115,7 @@ function setupMockFetch(options: {
       }
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve(transactions),
+        json: () => Promise.resolve(createPaginatedResponse(transactions)),
       })
     }
 
@@ -201,12 +220,12 @@ describe('TransactionsPage', () => {
       if (url.includes('type=CREDIT')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(creditOnly),
+          json: () => Promise.resolve(createPaginatedResponse(creditOnly)),
         })
       }
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve(mockTransactions),
+        json: () => Promise.resolve(createPaginatedResponse(mockTransactions)),
       })
     })
 
@@ -221,7 +240,7 @@ describe('TransactionsPage', () => {
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/transactions?type=CREDIT',
+        'http://localhost:3001/transactions?page=1&limit=8&type=CREDIT',
         expect.any(Object)
       )
     })
@@ -282,7 +301,7 @@ describe('TransactionsPage', () => {
         }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve([]),
+          json: () => Promise.resolve(createPaginatedResponse([])),
         })
       })
 
@@ -324,7 +343,7 @@ describe('TransactionsPage', () => {
         }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve([]),
+          json: () => Promise.resolve(createPaginatedResponse([])),
         })
       })
 

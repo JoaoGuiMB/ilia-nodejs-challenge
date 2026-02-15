@@ -2,9 +2,11 @@ import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionFilterDto } from './dto/transaction-filter.dto';
 import { TransactionResponse } from './interfaces/transaction-response.interface';
+import { PaginatedResponse } from './interfaces/paginated-response.interface';
 import {
   ITransactionsRepository,
   TRANSACTIONS_REPOSITORY,
+  PaginatedResult,
 } from './interfaces/transactions-repository.interface';
 import { Transaction } from './entities/transaction.entity';
 
@@ -35,19 +37,36 @@ export class TransactionsService {
   async findAllByUser(
     userId: string,
     filter?: TransactionFilterDto,
-  ): Promise<TransactionResponse[]> {
-    let transactions: Transaction[];
+  ): Promise<PaginatedResponse<TransactionResponse>> {
+    const page = filter?.page ?? 1;
+    const limit = filter?.limit ?? 8;
+    const pagination = { page, limit };
+
+    let result: PaginatedResult<Transaction>;
 
     if (filter?.type) {
-      transactions = await this.transactionsRepository.findByUserIdAndType(
+      result = await this.transactionsRepository.findByUserIdAndType(
         userId,
         filter.type,
+        pagination,
       );
     } else {
-      transactions = await this.transactionsRepository.findByUserId(userId);
+      result = await this.transactionsRepository.findByUserId(userId, pagination);
     }
 
-    return transactions.map((transaction) => this.toResponse(transaction));
+    const totalPages = Math.ceil(result.total / limit);
+
+    return {
+      data: result.data.map((transaction) => this.toResponse(transaction)),
+      meta: {
+        page,
+        limit,
+        total: result.total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   private toResponse(transaction: Transaction): TransactionResponse {

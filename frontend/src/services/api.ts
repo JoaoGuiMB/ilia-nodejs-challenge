@@ -1,4 +1,4 @@
-import type { AuthResponse, UserResponse, TransactionResponse, BalanceResponse } from '@/types'
+import type { AuthResponse, UserResponse, TransactionResponse, BalanceResponse, PaginatedResponse } from '@/types'
 import type { LoginFormData, CreateUserFormData } from '@/schemas'
 
 const USERS_API_URL = import.meta.env.VITE_USERS_API_URL || 'http://localhost:3002'
@@ -8,6 +8,12 @@ const TOKEN_KEY = 'access_token'
 
 interface RequestOptions extends RequestInit {
   skipAuth?: boolean;
+}
+
+export interface GetTransactionsParams {
+  type?: string;
+  page?: number;
+  limit?: number;
 }
 
 export function getToken(): string | null {
@@ -72,11 +78,17 @@ export const walletApi = {
   getBalance: () =>
     fetchWithAuth<BalanceResponse>(`${WALLET_API_URL}/balance`),
 
-  getTransactions: (type?: string) => {
-    const url = type
-      ? `${WALLET_API_URL}/transactions?type=${type}`
-      : `${WALLET_API_URL}/transactions`
-    return fetchWithAuth<TransactionResponse[]>(url)
+  getTransactions: (params: GetTransactionsParams = {}) => {
+    const { type, page = 1, limit = 8 } = params
+    const searchParams = new URLSearchParams()
+    searchParams.set('page', String(page))
+    searchParams.set('limit', String(limit))
+    if (type) {
+      searchParams.set('type', type)
+    }
+    return fetchWithAuth<PaginatedResponse<TransactionResponse>>(
+      `${WALLET_API_URL}/transactions?${searchParams.toString()}`
+    )
   },
 
   createTransaction: (data: { type: 'CREDIT' | 'DEBIT'; amount: number }) =>

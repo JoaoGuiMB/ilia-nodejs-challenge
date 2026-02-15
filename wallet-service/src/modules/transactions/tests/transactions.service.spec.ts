@@ -20,6 +20,8 @@ describe('TransactionsService', () => {
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
   };
 
+  const defaultPagination = { page: 1, limit: 8 };
+
   beforeEach(async () => {
     mockRepository = {
       create: jest.fn(),
@@ -124,32 +126,89 @@ describe('TransactionsService', () => {
       },
     ];
 
-    it('should return all transactions for a user', async () => {
+    it('should return paginated transactions for a user', async () => {
       const userId = 'user-123';
-      mockRepository.findByUserId.mockResolvedValue(transactions);
+      mockRepository.findByUserId.mockResolvedValue({
+        data: transactions,
+        total: 2,
+      });
 
       const result = await service.findAllByUser(userId);
 
-      expect(mockRepository.findByUserId).toHaveBeenCalledWith(userId);
-      expect(result).toHaveLength(2);
-      expect(result[0].user_id).toBe(userId);
-      expect(result[1].user_id).toBe(userId);
+      expect(mockRepository.findByUserId).toHaveBeenCalledWith(
+        userId,
+        defaultPagination,
+      );
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0].user_id).toBe(userId);
+      expect(result.data[1].user_id).toBe(userId);
+      expect(result.meta.total).toBe(2);
+      expect(result.meta.page).toBe(1);
+      expect(result.meta.limit).toBe(8);
+    });
+
+    it('should return correct pagination metadata', async () => {
+      const userId = 'user-123';
+      mockRepository.findByUserId.mockResolvedValue({
+        data: transactions,
+        total: 20,
+      });
+
+      const result = await service.findAllByUser(userId, {
+        page: 2,
+        limit: 8,
+      });
+
+      expect(result.meta).toEqual({
+        page: 2,
+        limit: 8,
+        total: 20,
+        totalPages: 3,
+        hasNextPage: true,
+        hasPreviousPage: true,
+      });
+    });
+
+    it('should return hasNextPage false on last page', async () => {
+      const userId = 'user-123';
+      mockRepository.findByUserId.mockResolvedValue({
+        data: transactions,
+        total: 10,
+      });
+
+      const result = await service.findAllByUser(userId, {
+        page: 2,
+        limit: 8,
+      });
+
+      expect(result.meta.hasNextPage).toBe(false);
+      expect(result.meta.hasPreviousPage).toBe(true);
     });
 
     it('should return empty array when user has no transactions', async () => {
       const userId = 'user-456';
-      mockRepository.findByUserId.mockResolvedValue([]);
+      mockRepository.findByUserId.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
 
       const result = await service.findAllByUser(userId);
 
-      expect(mockRepository.findByUserId).toHaveBeenCalledWith(userId);
-      expect(result).toEqual([]);
+      expect(mockRepository.findByUserId).toHaveBeenCalledWith(
+        userId,
+        defaultPagination,
+      );
+      expect(result.data).toEqual([]);
+      expect(result.meta.total).toBe(0);
     });
 
     it('should filter transactions by CREDIT type', async () => {
       const userId = 'user-123';
       const creditTransactions = [mockTransaction];
-      mockRepository.findByUserIdAndType.mockResolvedValue(creditTransactions);
+      mockRepository.findByUserIdAndType.mockResolvedValue({
+        data: creditTransactions,
+        total: 1,
+      });
 
       const result = await service.findAllByUser(userId, {
         type: TransactionType.CREDIT,
@@ -158,15 +217,19 @@ describe('TransactionsService', () => {
       expect(mockRepository.findByUserIdAndType).toHaveBeenCalledWith(
         userId,
         TransactionType.CREDIT,
+        defaultPagination,
       );
-      expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('CREDIT');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].type).toBe('CREDIT');
     });
 
     it('should filter transactions by DEBIT type', async () => {
       const userId = 'user-123';
       const debitTransactions = [transactions[1]];
-      mockRepository.findByUserIdAndType.mockResolvedValue(debitTransactions);
+      mockRepository.findByUserIdAndType.mockResolvedValue({
+        data: debitTransactions,
+        total: 1,
+      });
 
       const result = await service.findAllByUser(userId, {
         type: TransactionType.DEBIT,
@@ -175,29 +238,39 @@ describe('TransactionsService', () => {
       expect(mockRepository.findByUserIdAndType).toHaveBeenCalledWith(
         userId,
         TransactionType.DEBIT,
+        defaultPagination,
       );
-      expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('DEBIT');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].type).toBe('DEBIT');
     });
 
     it('should not filter when type is not provided', async () => {
       const userId = 'user-123';
-      mockRepository.findByUserId.mockResolvedValue(transactions);
+      mockRepository.findByUserId.mockResolvedValue({
+        data: transactions,
+        total: 2,
+      });
 
       const result = await service.findAllByUser(userId, {});
 
-      expect(mockRepository.findByUserId).toHaveBeenCalledWith(userId);
+      expect(mockRepository.findByUserId).toHaveBeenCalledWith(
+        userId,
+        defaultPagination,
+      );
       expect(mockRepository.findByUserIdAndType).not.toHaveBeenCalled();
-      expect(result).toHaveLength(2);
+      expect(result.data).toHaveLength(2);
     });
 
     it('should convert transaction entity to response format', async () => {
       const userId = 'user-123';
-      mockRepository.findByUserId.mockResolvedValue([mockTransaction]);
+      mockRepository.findByUserId.mockResolvedValue({
+        data: [mockTransaction],
+        total: 1,
+      });
 
       const result = await service.findAllByUser(userId);
 
-      expect(result[0]).toEqual({
+      expect(result.data[0]).toEqual({
         id: mockTransaction.id,
         user_id: mockTransaction.userId,
         type: mockTransaction.type,

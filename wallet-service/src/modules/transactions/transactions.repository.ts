@@ -6,6 +6,8 @@ import {
   ITransactionsRepository,
   CreateTransactionData,
   BalanceAggregation,
+  PaginationParams,
+  PaginatedResult,
 } from './interfaces/transactions-repository.interface';
 import { TransactionType } from '../../common/types';
 
@@ -21,21 +23,39 @@ export class TransactionsRepository implements ITransactionsRepository {
     return this.repository.save(transaction);
   }
 
-  async findByUserId(userId: string): Promise<Transaction[]> {
-    return this.repository.find({
+  async findByUserId(
+    userId: string,
+    pagination: PaginationParams,
+  ): Promise<PaginatedResult<Transaction>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.repository.findAndCount({
       where: { userId },
       order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
     });
+
+    return { data, total };
   }
 
   async findByUserIdAndType(
     userId: string,
     type: TransactionType,
-  ): Promise<Transaction[]> {
-    return this.repository.find({
+    pagination: PaginationParams,
+  ): Promise<PaginatedResult<Transaction>> {
+    const { page, limit } = pagination;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.repository.findAndCount({
       where: { userId, type },
       order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
     });
+
+    return { data, total };
   }
 
   async findOne(id: string): Promise<Transaction | null> {

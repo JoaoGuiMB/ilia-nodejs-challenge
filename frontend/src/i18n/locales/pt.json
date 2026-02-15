@@ -74,7 +74,8 @@
     "filterCredit": "Crédito",
     "filterDebit": "Débito",
     "noTransactions": "Nenhuma transação ainda",
-    "noTransactionsDescription": "Crie sua primeira transação para começar a acompanhar suas finanças."
+    "noTransactionsDescription": "Crie sua primeira transação para começar a acompanhar suas finanças.",
+    "loadingMore": "Carregando mais transações..."
   },
   "accessibility": {
     "toggleTheme": "Alternar modo de cor",

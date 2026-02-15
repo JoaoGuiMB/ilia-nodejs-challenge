@@ -3,6 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useTransactions, useCreateTransaction } from './use-transactions'
+import type { PaginatedResponse, TransactionResponse } from '@/types'
 
 const mockFetch = vi.fn()
 
@@ -26,7 +27,7 @@ function createWrapper() {
   }
 }
 
-const mockTransactions = [
+const mockTransactions: TransactionResponse[] = [
   {
     id: '1',
     user_id: 'user-1',
@@ -50,6 +51,26 @@ const mockTransactions = [
   },
 ]
 
+function createPaginatedResponse(
+  data: TransactionResponse[],
+  page: number,
+  total: number,
+  limit = 8
+): PaginatedResponse<TransactionResponse> {
+  const totalPages = Math.ceil(total / limit)
+  return {
+    data,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  }
+}
+
 describe('useTransactions', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -66,7 +87,7 @@ describe('useTransactions', () => {
   it('should start with loading state', () => {
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve([]),
+      json: () => Promise.resolve(createPaginatedResponse([], 1, 0)),
     })
 
     const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() })
@@ -76,10 +97,10 @@ describe('useTransactions', () => {
     expect(result.current.error).toBeNull()
   })
 
-  it('should fetch and return all transactions', async () => {
+  it('should fetch and return paginated transactions', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(mockTransactions),
+      json: () => Promise.resolve(createPaginatedResponse(mockTransactions, 1, 3)),
     })
 
     const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() })
@@ -90,8 +111,9 @@ describe('useTransactions', () => {
 
     expect(result.current.transactions).toEqual(mockTransactions)
     expect(result.current.error).toBeNull()
+    expect(result.current.hasNextPage).toBe(false)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/transactions',
+      'http://localhost:3001/transactions?page=1&limit=8',
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: 'Bearer test-token',
@@ -100,11 +122,11 @@ describe('useTransactions', () => {
     )
   })
 
-  it('should filter transactions by CREDIT type', async () => {
+  it('should filter transactions by CREDIT type with pagination', async () => {
     const creditTransactions = mockTransactions.filter(t => t.type === 'CREDIT')
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(creditTransactions),
+      json: () => Promise.resolve(createPaginatedResponse(creditTransactions, 1, 2)),
     })
 
     const { result } = renderHook(() => useTransactions('CREDIT'), { wrapper: createWrapper() })
@@ -115,16 +137,16 @@ describe('useTransactions', () => {
 
     expect(result.current.transactions).toEqual(creditTransactions)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/transactions?type=CREDIT',
+      'http://localhost:3001/transactions?page=1&limit=8&type=CREDIT',
       expect.any(Object)
     )
   })
 
-  it('should filter transactions by DEBIT type', async () => {
+  it('should filter transactions by DEBIT type with pagination', async () => {
     const debitTransactions = mockTransactions.filter(t => t.type === 'DEBIT')
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(debitTransactions),
+      json: () => Promise.resolve(createPaginatedResponse(debitTransactions, 1, 1)),
     })
 
     const { result } = renderHook(() => useTransactions('DEBIT'), { wrapper: createWrapper() })
@@ -135,7 +157,7 @@ describe('useTransactions', () => {
 
     expect(result.current.transactions).toEqual(debitTransactions)
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/transactions?type=DEBIT',
+      'http://localhost:3001/transactions?page=1&limit=8&type=DEBIT',
       expect.any(Object)
     )
   })
@@ -143,7 +165,7 @@ describe('useTransactions', () => {
   it('should not pass type param when filter is ALL', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve(mockTransactions),
+      json: () => Promise.resolve(createPaginatedResponse(mockTransactions, 1, 3)),
     })
 
     const { result } = renderHook(() => useTransactions('ALL'), { wrapper: createWrapper() })
@@ -153,7 +175,7 @@ describe('useTransactions', () => {
     })
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/transactions',
+      'http://localhost:3001/transactions?page=1&limit=8',
       expect.any(Object)
     )
   })
@@ -188,15 +210,65 @@ describe('useTransactions', () => {
     expect(result.current.transactions).toEqual([])
   })
 
+  it('should indicate hasNextPage when more pages available', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(createPaginatedResponse(mockTransactions.slice(0, 2), 1, 10)),
+    })
+
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.hasNextPage).toBe(true)
+  })
+
+  it('should fetch next page when fetchNextPage is called', async () => {
+    // Use limit of 2 to ensure there are multiple pages
+    const page1Response = createPaginatedResponse(mockTransactions.slice(0, 2), 1, 3, 2)
+    const page2Response = createPaginatedResponse([mockTransactions[2]], 2, 3, 2)
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(page1Response),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(page2Response),
+      })
+
+    const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.transactions).toHaveLength(2)
+    expect(result.current.hasNextPage).toBe(true)
+
+    await act(async () => {
+      await result.current.fetchNextPage()
+    })
+
+    await waitFor(() => {
+      expect(result.current.transactions).toHaveLength(3)
+    })
+
+    expect(result.current.transactions).toEqual(mockTransactions)
+  })
+
   it('should refetch transactions', async () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve([mockTransactions[0]]),
+        json: () => Promise.resolve(createPaginatedResponse([mockTransactions[0]], 1, 1)),
       })
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockTransactions),
+        json: () => Promise.resolve(createPaginatedResponse(mockTransactions, 1, 3)),
       })
 
     const { result } = renderHook(() => useTransactions(), { wrapper: createWrapper() })

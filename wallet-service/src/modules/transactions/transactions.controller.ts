@@ -19,6 +19,7 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionFilterDto } from './dto/transaction-filter.dto';
 import { TransactionResponse } from './interfaces/transaction-response.interface';
+import { PaginatedResponse } from './interfaces/paginated-response.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -82,7 +83,7 @@ export class TransactionsController {
   @ApiOperation({
     summary: 'Get user transactions',
     description:
-      'Returns all transactions for the authenticated user. Can be filtered by type.',
+      'Returns paginated transactions for the authenticated user. Can be filtered by type.',
   })
   @ApiQuery({
     name: 'type',
@@ -90,19 +91,49 @@ export class TransactionsController {
     enum: ['CREDIT', 'DEBIT'],
     description: 'Filter transactions by type',
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page (default: 8, max: 100)',
+    example: 8,
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of transactions',
+    description: 'Paginated list of transactions',
     schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', format: 'uuid' },
-          user_id: { type: 'string', format: 'uuid' },
-          type: { type: 'string', enum: ['CREDIT', 'DEBIT'] },
-          amount: { type: 'number' },
-          created_at: { type: 'string', format: 'date-time' },
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid' },
+              user_id: { type: 'string', format: 'uuid' },
+              type: { type: 'string', enum: ['CREDIT', 'DEBIT'] },
+              amount: { type: 'number' },
+              created_at: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            page: { type: 'number', example: 1 },
+            limit: { type: 'number', example: 8 },
+            total: { type: 'number', example: 50 },
+            totalPages: { type: 'number', example: 7 },
+            hasNextPage: { type: 'boolean', example: true },
+            hasPreviousPage: { type: 'boolean', example: false },
+          },
         },
       },
     },
@@ -113,7 +144,7 @@ export class TransactionsController {
   async findAll(
     @CurrentUser('sub') userId: string,
     @Query() filter: TransactionFilterDto,
-  ): Promise<TransactionResponse[]> {
+  ): Promise<PaginatedResponse<TransactionResponse>> {
     return this.transactionsService.findAllByUser(userId, filter);
   }
 }
