@@ -1,34 +1,34 @@
-import { Box, Container, Heading, Text, Button, Flex } from '@chakra-ui/react'
+import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import { useAuth } from '@/hooks/use-auth'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { useBalance } from '@/hooks/use-balance'
+import { BalanceCard } from '@/components/balance-card'
+import { LoadingSpinner } from '@/components/loading-spinner'
+import { ErrorMessage } from '@/components/error-message'
 
 export function DashboardPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
+  const { balance, isLoading, error, refetch } = useBalance()
 
   return (
-    <Box minH="100vh" bg="bg.canvas">
-      <Box bg="bg.surface" borderBottomWidth="1px" borderColor="border.default" py={4}>
-        <Container maxW="container.xl">
-          <Flex justify="space-between" align="center">
-            <Heading size="lg" color="fg.default">FinTech Wallet</Heading>
-            <Flex gap={2} align="center">
-              <ThemeToggle />
-              <Button variant="outline" size="sm" onClick={logout}>
-                Sign Out
-              </Button>
-            </Flex>
-          </Flex>
-        </Container>
-      </Box>
+    <Container maxW="container.xl" py={{ base: 6, md: 8 }}>
+      <VStack gap={{ base: 6, md: 8 }} align="stretch">
+        <Box>
+          <Heading size={{ base: 'lg', md: 'xl' }} color="fg.default" mb={2}>
+            Welcome back, {user?.first_name}!
+          </Heading>
+          <Text color="fg.muted" fontSize={{ base: 'sm', md: 'md' }}>
+            Here&apos;s your financial overview
+          </Text>
+        </Box>
 
-      <Container maxW="container.xl" py={8}>
-        <Heading size="xl" color="fg.default" mb={2}>
-          Welcome back, {user?.first_name}!
-        </Heading>
-        <Text color="fg.muted">
-          This is your dashboard. Balance and transactions will be available in the next task.
-        </Text>
-      </Container>
-    </Box>
+        {isLoading && <LoadingSpinner message="Loading your balance..." />}
+
+        {error && <ErrorMessage message={error} onRetry={refetch} />}
+
+        {!isLoading && !error && balance !== null && (
+          <BalanceCard balance={balance} />
+        )}
+      </VStack>
+    </Container>
   )
 }
