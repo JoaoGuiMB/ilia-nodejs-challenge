@@ -7,11 +7,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: users_db
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - users-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d users_db']
+      test: ["CMD-SHELL", "pg_isready -U postgres -d users_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,11 +24,11 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: wallet_db
     ports:
-      - '5433:5432'
+      - "5433:5432"
     volumes:
       - wallet-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d wallet_db']
+      test: ["CMD-SHELL", "pg_isready -U postgres -d wallet_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,7 +49,7 @@ services:
       JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
       WALLET_SERVICE_URL: http://wallet-service:3001
     ports:
-      - '3002:3002'
+      - "3002:3002"
     depends_on:
       users-db:
         condition: service_healthy
@@ -69,7 +69,7 @@ services:
       JWT_SECRET: ILIACHALLENGE
       JWT_INTERNAL_SECRET: ILIACHALLENGE_INTERNAL
     ports:
-      - '3001:3001'
+      - "3001:3001"
     depends_on:
       wallet-db:
         condition: service_healthy
@@ -80,7 +80,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     ports:
-      - '3000:80'
+      - "3000:80"
     depends_on:
       - users-service
       - wallet-service

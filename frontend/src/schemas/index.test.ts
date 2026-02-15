@@ -246,16 +246,16 @@ describe('createTransactionFormSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should coerce string amount to number', () => {
-    const dataWithStringAmount = {
+  it('should reject NaN amount with proper error message', () => {
+    const dataWithNaN = {
       type: 'CREDIT' as const,
-      amount: '100',
+      amount: NaN,
     }
 
-    const result = createTransactionFormSchema.safeParse(dataWithStringAmount)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.amount).toBe(100)
+    const result = createTransactionFormSchema.safeParse(dataWithNaN)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Amount must be a positive number')
     }
   })
 
