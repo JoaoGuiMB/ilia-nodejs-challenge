@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { HealthModule } from './modules/health/health.module';
+import { WalletClientModule } from './modules/wallet-client/wallet-client.module';
 import { User } from './modules/users/entities/user.entity';
 
 @Module({
@@ -30,6 +32,8 @@ import { User } from './modules/users/entities/user.entity';
     }),
     UsersModule,
     AuthModule,
+    HealthModule,
+    WalletClientModule,
   ],
   controllers: [AppController],
   providers: [AppService],
