@@ -1,8 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import { useBalance } from './use-balance'
 
 const mockFetch = vi.fn()
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    )
+  }
+}
 
 describe('useBalance', () => {
   beforeEach(() => {
@@ -23,7 +42,7 @@ describe('useBalance', () => {
       json: () => Promise.resolve({ amount: 100 }),
     })
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     expect(result.current.isLoading).toBe(true)
     expect(result.current.balance).toBeNull()
@@ -36,7 +55,7 @@ describe('useBalance', () => {
       json: () => Promise.resolve({ amount: 1500.50 }),
     })
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
@@ -52,7 +71,7 @@ describe('useBalance', () => {
       json: () => Promise.resolve({ amount: 100 }),
     })
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     // Initially loading
     expect(result.current.isLoading).toBe(true)
@@ -69,7 +88,7 @@ describe('useBalance', () => {
       json: () => Promise.resolve({ message: 'Server error' }),
     })
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
@@ -82,7 +101,7 @@ describe('useBalance', () => {
   it('should handle network error', async () => {
     mockFetch.mockRejectedValue(new Error('Network error'))
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
@@ -103,7 +122,7 @@ describe('useBalance', () => {
         json: () => Promise.resolve({ amount: 200 }),
       })
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
@@ -115,7 +134,9 @@ describe('useBalance', () => {
       await result.current.refetch()
     })
 
-    expect(result.current.balance).toBe(200)
+    await waitFor(() => {
+      expect(result.current.balance).toBe(200)
+    })
   })
 
   it('should clear error on successful refetch', async () => {
@@ -130,7 +151,7 @@ describe('useBalance', () => {
         json: () => Promise.resolve({ amount: 100 }),
       })
 
-    const { result } = renderHook(() => useBalance())
+    const { result } = renderHook(() => useBalance(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.error).toBe('Error')
@@ -140,7 +161,9 @@ describe('useBalance', () => {
       await result.current.refetch()
     })
 
-    expect(result.current.error).toBeNull()
+    await waitFor(() => {
+      expect(result.current.error).toBeNull()
+    })
     expect(result.current.balance).toBe(100)
   })
 })

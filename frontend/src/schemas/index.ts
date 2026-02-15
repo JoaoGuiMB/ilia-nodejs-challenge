@@ -18,6 +18,12 @@ export const createTransactionSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
 })
 
+export const createTransactionFormSchema = z.object({
+  type: z.enum(['CREDIT', 'DEBIT']),
+  amount: z.coerce.number().positive('Amount must be a positive number'),
+})
+
 export type LoginFormData = z.infer<typeof loginSchema>
 export type CreateUserFormData = z.infer<typeof createUserSchema>
 export type CreateTransactionFormData = z.infer<typeof createTransactionSchema>
+export type CreateTransactionFormInput = z.infer<typeof createTransactionFormSchema>

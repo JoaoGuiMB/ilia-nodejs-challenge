@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { walletApi } from '@/services/api'
 
 interface UseBalanceResult {
@@ -9,34 +9,20 @@ interface UseBalanceResult {
 }
 
 export function useBalance(): UseBalanceResult {
-  const [balance, setBalance] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchBalance = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['balance'],
+    queryFn: async () => {
       const response = await walletApi.getBalance()
-      setBalance(response.amount)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch balance'
-      setError(errorMessage)
-      setBalance(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchBalance()
-  }, [fetchBalance])
+      return response.amount
+    },
+  })
 
   return {
-    balance,
+    balance: data ?? null,
     isLoading,
-    error,
-    refetch: fetchBalance,
+    error: error instanceof Error ? error.message : null,
+    refetch: async () => {
+      await refetch()
+    },
   }
 }

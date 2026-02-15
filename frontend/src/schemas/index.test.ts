@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { loginSchema, createUserSchema } from './index'
+import { loginSchema, createUserSchema, createTransactionSchema, createTransactionFormSchema } from './index'
 
 describe('loginSchema', () => {
   it('should validate a valid login', () => {
@@ -155,5 +155,140 @@ describe('createUserSchema', () => {
     if (!result.success) {
       expect(result.error.issues.length).toBeGreaterThanOrEqual(4)
     }
+  })
+})
+
+describe('createTransactionSchema', () => {
+  it('should validate a valid credit transaction', () => {
+    const validTransaction = {
+      user_id: '550e8400-e29b-41d4-a716-446655440000',
+      type: 'CREDIT' as const,
+      amount: 100,
+    }
+
+    const result = createTransactionSchema.safeParse(validTransaction)
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate a valid debit transaction', () => {
+    const validTransaction = {
+      user_id: '550e8400-e29b-41d4-a716-446655440000',
+      type: 'DEBIT' as const,
+      amount: 50.50,
+    }
+
+    const result = createTransactionSchema.safeParse(validTransaction)
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid user_id', () => {
+    const invalidTransaction = {
+      user_id: 'invalid-uuid',
+      type: 'CREDIT' as const,
+      amount: 100,
+    }
+
+    const result = createTransactionSchema.safeParse(invalidTransaction)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Invalid user ID')
+    }
+  })
+
+  it('should reject invalid type', () => {
+    const invalidTransaction = {
+      user_id: '550e8400-e29b-41d4-a716-446655440000',
+      type: 'TRANSFER',
+      amount: 100,
+    }
+
+    const result = createTransactionSchema.safeParse(invalidTransaction)
+    expect(result.success).toBe(false)
+  })
+
+  it('should reject zero amount', () => {
+    const invalidTransaction = {
+      user_id: '550e8400-e29b-41d4-a716-446655440000',
+      type: 'CREDIT' as const,
+      amount: 0,
+    }
+
+    const result = createTransactionSchema.safeParse(invalidTransaction)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Amount must be positive')
+    }
+  })
+
+  it('should reject negative amount', () => {
+    const invalidTransaction = {
+      user_id: '550e8400-e29b-41d4-a716-446655440000',
+      type: 'CREDIT' as const,
+      amount: -100,
+    }
+
+    const result = createTransactionSchema.safeParse(invalidTransaction)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Amount must be positive')
+    }
+  })
+})
+
+describe('createTransactionFormSchema', () => {
+  it('should validate valid form data', () => {
+    const validData = {
+      type: 'CREDIT' as const,
+      amount: 100,
+    }
+
+    const result = createTransactionFormSchema.safeParse(validData)
+    expect(result.success).toBe(true)
+  })
+
+  it('should coerce string amount to number', () => {
+    const dataWithStringAmount = {
+      type: 'CREDIT' as const,
+      amount: '100',
+    }
+
+    const result = createTransactionFormSchema.safeParse(dataWithStringAmount)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.amount).toBe(100)
+    }
+  })
+
+  it('should reject negative amount', () => {
+    const invalidData = {
+      type: 'DEBIT' as const,
+      amount: -50,
+    }
+
+    const result = createTransactionFormSchema.safeParse(invalidData)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Amount must be a positive number')
+    }
+  })
+
+  it('should validate DEBIT type', () => {
+    const validData = {
+      type: 'DEBIT' as const,
+      amount: 50,
+    }
+
+    const result = createTransactionFormSchema.safeParse(validData)
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid type', () => {
+    const invalidData = {
+      type: 'INVALID',
+      amount: 100,
+    }
+
+    const result = createTransactionFormSchema.safeParse(invalidData)
+    expect(result.success).toBe(false)
   })
 })

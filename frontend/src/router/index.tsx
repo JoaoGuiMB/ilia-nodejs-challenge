@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/protected-route'
 import { LoginPage } from '@/pages/login'
 import { RegisterPage } from '@/pages/register'
 import { DashboardPage } from '@/pages/dashboard'
+import { TransactionsPage } from '@/pages/transactions'
 
 export const router = createBrowserRouter([
   {
@@ -25,18 +26,9 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
-          { path: '/transactions', element: <TransactionsPlaceholder /> },
+          { path: '/transactions', element: <TransactionsPage /> },
         ],
       },
     ],
   },
 ])
-
-function TransactionsPlaceholder() {
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h2>Transactions</h2>
-      <p>Coming in Task 11.0</p>
-    </div>
-  )
-}

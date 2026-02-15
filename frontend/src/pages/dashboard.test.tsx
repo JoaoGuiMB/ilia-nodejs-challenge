@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { DashboardPage } from './dashboard'
 
@@ -18,12 +19,22 @@ function renderWithProviders(ui: React.ReactElement) {
   localStorage.setItem('access_token', 'test-token')
   localStorage.setItem('user', JSON.stringify(mockUser))
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+
   return render(
-    <MemoryRouter>
-      <ChakraProvider value={defaultSystem}>
-        <AuthProvider>{ui}</AuthProvider>
-      </ChakraProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <ChakraProvider value={defaultSystem}>
+          <AuthProvider>{ui}</AuthProvider>
+        </ChakraProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   )
 }
 
@@ -143,5 +154,63 @@ describe('DashboardPage', () => {
 
     expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument()
+  })
+
+  it('should render quick action buttons when balance is loaded', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ amount: 100 }),
+    })
+
+    renderWithProviders(<DashboardPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('$100.00')).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('Quick Actions')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /\+ add credit/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /- add debit/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /view all transactions/i })).toBeInTheDocument()
+  })
+
+  it('should open quick transaction modal when clicking Add Credit', async () => {
+    const user = userEvent.setup()
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ amount: 100 }),
+    })
+
+    renderWithProviders(<DashboardPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('$100.00')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /\+ add credit/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Quick Transaction')).toBeInTheDocument()
+    })
+  })
+
+  it('should open quick transaction modal when clicking Add Debit', async () => {
+    const user = userEvent.setup()
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ amount: 100 }),
+    })
+
+    renderWithProviders(<DashboardPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('$100.00')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /- add debit/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Quick Transaction')).toBeInTheDocument()
+    })
   })
 })
