@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { Box, Container, Flex, Heading, Button, HStack } from '@chakra-ui/react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { SkipLink } from '@/components/skip-link'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { SkipLink } from '@/components/SkipLink'
 
 export function DashboardLayout() {
   const { t } = useTranslation()

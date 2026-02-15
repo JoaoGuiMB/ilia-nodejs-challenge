@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
-import { TransactionsPage } from './transactions'
+import { TransactionsPage } from '.'
 
 const mockFetch = vi.fn()
 
@@ -297,7 +297,7 @@ describe('TransactionsPage', () => {
       render(<TransactionsPage />, { wrapper: createWrapper() })
 
       await waitFor(() => {
-        expect(screen.getByText('Balance fetch failed')).toBeInTheDocument()
+        expect(screen.getByText('Failed to fetch balance')).toBeInTheDocument()
       })
 
       expect(screen.getByRole('button', { name: 'Try Again' })).toBeInTheDocument()
@@ -331,7 +331,7 @@ describe('TransactionsPage', () => {
       render(<TransactionsPage />, { wrapper: createWrapper() })
 
       await waitFor(() => {
-        expect(screen.getByText('Balance fetch failed')).toBeInTheDocument()
+        expect(screen.getByText('Failed to fetch balance')).toBeInTheDocument()
       })
 
       const retryButton = screen.getByRole('button', { name: 'Try Again' })

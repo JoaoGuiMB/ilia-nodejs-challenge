@@ -4,8 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { ChakraProvider } from '@chakra-ui/react'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { ColorModeProvider } from '@/components/ui/color-mode'
-import { LoginPage } from './login'
+import { ColorModeProvider } from '@/components/ui/ColorMode'
+import { LoginPage } from '.'
 import { system } from '@/theme'
 
 const mockFetch = vi.fn()

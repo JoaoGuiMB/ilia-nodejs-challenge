@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChakraProvider } from '@chakra-ui/react'
 import i18n from 'i18next'
-import { LanguageSwitcher } from './language-switcher'
+import { LanguageSwitcher } from '.'
 import { system } from '@/theme'
 
 function renderWithProviders(ui: React.ReactNode) {

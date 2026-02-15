@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react'
 import { createTransactionFormSchema, type CreateTransactionFormInput } from '@/schemas'
 import { useCreateTransaction } from '@/hooks/use-transactions'
+import { translateError } from '@/utils/translate-error'
 
 interface TransactionFormProps {
   onSuccess?: () => void;
@@ -51,7 +52,8 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
       onSuccess?.()
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('transactions.createFailed'))
+      const errorMessage = err instanceof Error ? err.message : t('transactions.createFailed')
+      setError(translateError(errorMessage, t))
     }
   }
 

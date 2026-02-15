@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ChakraProvider } from '@chakra-ui/react'
-import { SkipLink } from './skip-link'
+import { SkipLink } from '.'
 import { system } from '@/theme'
 
 function renderWithProviders(ui: React.ReactNode) {

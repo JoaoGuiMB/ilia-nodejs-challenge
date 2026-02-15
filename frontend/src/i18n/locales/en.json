@@ -83,5 +83,14 @@
     "transactionType": "Transaction type",
     "filterTransactions": "Filter transactions",
     "mainNavigation": "Main navigation"
+  },
+  "errors": {
+    "invalidCredentials": "Invalid credentials",
+    "emailAlreadyExists": "Email already exists",
+    "serverError": "Server error",
+    "balanceFetchFailed": "Failed to fetch balance",
+    "networkError": "Network error",
+    "unauthorized": "Unauthorized",
+    "sessionExpired": "Session expired"
   }
 }

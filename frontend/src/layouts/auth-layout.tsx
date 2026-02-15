@@ -2,9 +2,9 @@ import { Outlet, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Container, Flex, Heading, Text } from '@chakra-ui/react'
 import { useAuth } from '@/hooks/use-auth'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { SkipLink } from '@/components/skip-link'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { SkipLink } from '@/components/SkipLink'
 
 export function AuthLayout() {
   const { t } = useTranslation()

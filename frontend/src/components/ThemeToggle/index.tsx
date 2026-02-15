@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ColorModeButton } from '@/components/ui/color-mode'
+import { ColorModeButton } from '@/components/ui/ColorMode'
 
 export function ThemeToggle() {
   const { t } = useTranslation()

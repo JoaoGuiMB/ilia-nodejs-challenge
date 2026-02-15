@@ -1,10 +1,10 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthLayout } from '@/layouts/auth-layout'
 import { DashboardLayout } from '@/layouts/dashboard-layout'
-import { ProtectedRoute } from '@/components/protected-route'
-import { LoginPage } from '@/pages/login'
-import { RegisterPage } from '@/pages/register'
-import { TransactionsPage } from '@/pages/transactions'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { LoginPage } from '@/pages/Login'
+import { RegisterPage } from '@/pages/Register'
+import { TransactionsPage } from '@/pages/Transactions'
 
 export const router = createBrowserRouter([
   {

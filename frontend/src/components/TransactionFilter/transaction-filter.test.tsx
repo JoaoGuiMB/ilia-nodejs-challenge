@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { TransactionFilter } from './transaction-filter'
+import { TransactionFilter } from '.'
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(

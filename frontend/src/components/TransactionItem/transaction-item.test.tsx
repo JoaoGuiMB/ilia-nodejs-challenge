@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { TransactionItem } from './transaction-item'
+import { TransactionItem } from '.'
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(

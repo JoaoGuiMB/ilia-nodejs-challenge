@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TransactionForm } from './transaction-form'
+import { TransactionForm } from '.'
 
 function createWrapper() {
   const queryClient = new QueryClient({

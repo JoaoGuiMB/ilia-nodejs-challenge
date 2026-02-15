@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { ChakraProvider } from '@chakra-ui/react'
 import { AuthProvider } from '@/contexts/AuthContext'
-import { ProtectedRoute } from './protected-route'
+import { ProtectedRoute } from '.'
 import { system } from '@/theme'
 
 function TestWrapper({ children, initialEntries = ['/protected'] }: { children: React.ReactNode; initialEntries?: string[] }) {

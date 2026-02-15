@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { ErrorMessage } from './error-message'
+import { ErrorMessage } from '.'
 
 function renderWithChakra(ui: React.ReactElement) {
   return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>)

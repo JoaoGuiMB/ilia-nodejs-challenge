@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { VStack } from '@chakra-ui/react'
 import type { TransactionResponse } from '@/types'
-import { TransactionItem } from './transaction-item'
-import { EmptyState } from './empty-state'
+import { TransactionItem } from '@/components/TransactionItem'
+import { EmptyState } from '@/components/EmptyState'
 
 interface TransactionListProps {
   transactions: TransactionResponse[];
