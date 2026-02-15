@@ -15,7 +15,7 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-function renderWithProviders(initialRoute = '/dashboard') {
+function renderWithProviders(initialRoute = '/transactions') {
   const mockUser = {
     id: '1',
     first_name: 'Jane',
@@ -31,7 +31,6 @@ function renderWithProviders(initialRoute = '/dashboard') {
         <AuthProvider>
           <Routes>
             <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<div>Dashboard Content</div>} />
               <Route path="/transactions" element={<div>Transactions Content</div>} />
             </Route>
             <Route path="/login" element={<div>Login Page</div>} />
@@ -60,23 +59,6 @@ describe('DashboardLayout', () => {
     })
   })
 
-  it('should render navigation links', async () => {
-    renderWithProviders()
-
-    await waitFor(() => {
-      expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: /transactions/i })).toBeInTheDocument()
-    })
-  })
-
-  it('should render user greeting with first name', async () => {
-    renderWithProviders()
-
-    await waitFor(() => {
-      expect(screen.getByText(/hello, jane/i)).toBeInTheDocument()
-    })
-  })
-
   it('should render sign out button', async () => {
     renderWithProviders()
 
@@ -87,14 +69,6 @@ describe('DashboardLayout', () => {
   })
 
   it('should render outlet content', async () => {
-    renderWithProviders('/dashboard')
-
-    await waitFor(() => {
-      expect(screen.getByText('Dashboard Content')).toBeInTheDocument()
-    })
-  })
-
-  it('should render transactions content when on transactions route', async () => {
     renderWithProviders('/transactions')
 
     await waitFor(() => {

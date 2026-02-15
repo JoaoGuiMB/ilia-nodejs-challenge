@@ -15,7 +15,7 @@ export function AuthLayout() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/transactions" replace />
   }
 
   return (

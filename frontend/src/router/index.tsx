@@ -4,13 +4,12 @@ import { DashboardLayout } from '@/layouts/dashboard-layout'
 import { ProtectedRoute } from '@/components/protected-route'
 import { LoginPage } from '@/pages/login'
 import { RegisterPage } from '@/pages/register'
-import { DashboardPage } from '@/pages/dashboard'
 import { TransactionsPage } from '@/pages/transactions'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/transactions" replace />,
   },
   {
     element: <AuthLayout />,
@@ -25,7 +24,6 @@ export const router = createBrowserRouter([
       {
         element: <DashboardLayout />,
         children: [
-          { path: '/dashboard', element: <DashboardPage /> },
           { path: '/transactions', element: <TransactionsPage /> },
         ],
       },

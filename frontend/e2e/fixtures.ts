@@ -33,7 +33,7 @@ async function loginUser(page: Page, user: TestUser): Promise<void> {
   await page.getByLabel(/email/i).fill(user.email)
   await page.getByLabel(/password/i).fill(user.password)
   await page.getByRole('button', { name: /sign in/i }).click()
-  await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+  await expect(page).toHaveURL('/transactions', { timeout: 10000 })
 }
 
 export const test = base.extend<TestFixtures>({
@@ -52,9 +52,9 @@ export const test = base.extend<TestFixtures>({
     await registerUser(page, testUser)
     // Login the test user
     await loginUser(page, testUser)
-    // Wait for dashboard to load - look for the welcome heading
+    // Wait for transactions page to load - look for the transactions heading
     await expect(
-      page.getByRole('heading', { name: /welcome back/i })
+      page.getByRole('heading', { name: /transactions/i })
     ).toBeVisible({ timeout: 10000 })
     await use(page)
   },

@@ -1,15 +1,14 @@
 import { useTranslation } from 'react-i18next'
-import { Box, Container, Flex, Heading, Button, Text, HStack } from '@chakra-ui/react'
+import { Box, Container, Flex, Heading, Button, HStack } from '@chakra-ui/react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
-import { Navigation } from '@/components/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { SkipLink } from '@/components/skip-link'
 
 export function DashboardLayout() {
   const { t } = useTranslation()
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -62,14 +61,7 @@ export function DashboardLayout() {
               </Box>
             </Flex>
 
-            <Box w={{ base: 'full', md: 'auto' }}>
-              <Navigation />
-            </Box>
-
             <HStack gap={3} display={{ base: 'none', md: 'flex' }}>
-              <Text color="fg.muted" fontSize="sm">
-                {t('header.greeting', { name: user?.first_name })}
-              </Text>
               <LanguageSwitcher />
               <ThemeToggle />
               <Button

@@ -15,26 +15,18 @@ test.describe('Balance Display', () => {
   test('should update balance after credit transaction', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Get initial balance text
+    // Get balance region
     const balanceRegion = page.getByRole('region', { name: /current balance/i })
     await expect(balanceRegion).toBeVisible({ timeout: 10000 })
 
-    // Create a credit transaction via quick action
-    await page.getByRole('button', { name: /add credit/i }).click()
+    // Create a credit transaction using the form on transactions page
+    const form = page.locator('form[aria-label*="New Transaction"], form[aria-label*="new transaction"]')
+    await form.getByRole('button', { name: /credit/i }).click()
+    await form.getByLabel(/amount/i).fill('100.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
 
-    // Wait for modal
-    await expect(page.getByRole('dialog')).toBeVisible()
-
-    // Fill amount
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('100.00')
-
-    // Submit
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-
-    // Wait for modal to close
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
-
-    // Wait for balance to update
+    // Wait for success message
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
     // Balance should now show $100.00
@@ -45,23 +37,25 @@ test.describe('Balance Display', () => {
     const page = authenticatedPage
 
     // First add some credit
-    await page.getByRole('button', { name: /add credit/i }).click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('200.00')
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
+    const form = page.locator('form[aria-label*="New Transaction"], form[aria-label*="new transaction"]')
+    await form.getByRole('button', { name: /credit/i }).click()
+    await form.getByLabel(/amount/i).fill('200.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
     // Verify balance is $200.00
     const balanceRegion = page.getByRole('region', { name: /current balance/i })
     await expect(balanceRegion.getByText(/\$\s*200\.00/i)).toBeVisible()
 
+    // Clear the amount field first
+    await form.getByLabel(/amount/i).clear()
+
     // Now add a debit
-    await page.getByRole('button', { name: /add debit/i }).click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('50.00')
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
+    await form.getByRole('button', { name: /debit/i }).click()
+    await form.getByLabel(/amount/i).fill('50.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
     // Balance should now show $150.00
@@ -74,28 +68,29 @@ test.describe('Balance Display', () => {
     const balanceRegion = page.getByRole('region', { name: /current balance/i })
     await expect(balanceRegion).toBeVisible({ timeout: 10000 })
 
+    const form = page.locator('form[aria-label*="New Transaction"], form[aria-label*="new transaction"]')
+
     // Add credit: $300
-    await page.getByRole('button', { name: /add credit/i }).click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('300.00')
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
+    await form.getByRole('button', { name: /credit/i }).click()
+    await form.getByLabel(/amount/i).fill('300.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
-    // Add debit: $75
-    await page.getByRole('button', { name: /add debit/i }).click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('75.00')
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
+    // Clear and add debit: $75
+    await form.getByLabel(/amount/i).clear()
+    await form.getByRole('button', { name: /debit/i }).click()
+    await form.getByLabel(/amount/i).fill('75.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
-    // Add credit: $50
-    await page.getByRole('button', { name: /add credit/i }).click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('50.00')
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
+    // Clear and add credit: $50
+    await form.getByLabel(/amount/i).clear()
+    await form.getByRole('button', { name: /credit/i }).click()
+    await form.getByLabel(/amount/i).fill('50.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
     // Balance should be $300 - $75 + $50 = $275.00
@@ -106,11 +101,11 @@ test.describe('Balance Display', () => {
     const page = authenticatedPage
 
     // Add credit
-    await page.getByRole('button', { name: /add credit/i }).click()
-    await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('500.00')
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
+    const form = page.locator('form[aria-label*="New Transaction"], form[aria-label*="new transaction"]')
+    await form.getByRole('button', { name: /credit/i }).click()
+    await form.getByLabel(/amount/i).fill('500.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
     await page.waitForTimeout(1000)
 
     // Verify balance
@@ -127,31 +122,45 @@ test.describe('Balance Display', () => {
     // Balance should still be $500.00
     await expect(balanceRegion.getByText(/\$\s*500\.00/i)).toBeVisible()
   })
+})
 
-  test('should show balance on dashboard after navigating from transactions', async ({ authenticatedPage }) => {
+test.describe('Transaction Creation', () => {
+  test('should create credit transaction successfully', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Go to transactions page using exact link name
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
-    await expect(page).toHaveURL('/transactions')
-
-    // Create a transaction
+    // Create a credit transaction using the form on transactions page
     const form = page.locator('form[aria-label*="New Transaction"], form[aria-label*="new transaction"]')
     await form.getByRole('button', { name: /credit/i }).click()
     await form.getByLabel(/amount/i).fill('123.45')
     await form.getByRole('button', { name: /create transaction/i }).click()
+
+    // Wait for success message
     await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
-    await page.waitForTimeout(500)
 
-    // Navigate back to dashboard using exact link name
-    await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
-    await expect(page).toHaveURL('/dashboard')
+    // Transaction should appear in the list (use +$ prefix to distinguish from balance)
+    await expect(page.getByText('+$123.45')).toBeVisible()
+  })
 
-    // Wait for balance to load
-    await page.waitForTimeout(1000)
+  test('should create debit transaction successfully', async ({ authenticatedPage }) => {
+    const page = authenticatedPage
 
-    // Balance should reflect the transaction
-    const balanceRegion = page.getByRole('region', { name: /current balance/i })
-    await expect(balanceRegion.getByText(/\$\s*123\.45/i)).toBeVisible()
+    // First create a credit to have funds
+    const form = page.locator('form[aria-label*="New Transaction"], form[aria-label*="new transaction"]')
+    await form.getByRole('button', { name: /credit/i }).click()
+    await form.getByLabel(/amount/i).fill('200.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
+
+    // Clear and create a debit transaction
+    await form.getByLabel(/amount/i).clear()
+    await form.getByRole('button', { name: /debit/i }).click()
+    await form.getByLabel(/amount/i).fill('50.00')
+    await form.getByRole('button', { name: /create transaction/i }).click()
+
+    // Wait for success message
+    await expect(page.getByText(/transaction created successfully/i)).toBeVisible({ timeout: 10000 })
+
+    // Transaction should appear in the list (use -$ prefix to distinguish from balance)
+    await expect(page.getByText('-$50.00')).toBeVisible()
   })
 })

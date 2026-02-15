@@ -4,8 +4,7 @@ test.describe('Transaction Creation', () => {
   test('should create a credit transaction', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions page using nav link (exact match)
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Fill transaction form
@@ -24,8 +23,7 @@ test.describe('Transaction Creation', () => {
   test('should create a debit transaction', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions page using nav link
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Fill transaction form
@@ -44,8 +42,7 @@ test.describe('Transaction Creation', () => {
   test('should show validation error for empty amount', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions page using nav link
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Try to submit form without amount
@@ -56,30 +53,10 @@ test.describe('Transaction Creation', () => {
     await expect(page).toHaveURL('/transactions')
   })
 
-  test('should create transaction via quick action on dashboard', async ({ authenticatedPage }) => {
-    const page = authenticatedPage
-
-    // Click add credit button on dashboard
-    await page.getByRole('button', { name: /add credit/i }).click()
-
-    // Wait for modal to open
-    await expect(page.getByRole('dialog')).toBeVisible()
-
-    // Fill amount in modal
-    await page.getByRole('dialog').getByLabel(/amount/i).fill('50.00')
-
-    // Submit
-    await page.getByRole('dialog').getByRole('button', { name: /create transaction/i }).click()
-
-    // Modal should close
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 10000 })
-  })
-
   test('should show transaction in list after creation', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions page using nav link
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Create a transaction with a specific amount
@@ -95,8 +72,8 @@ test.describe('Transaction Creation', () => {
     // Wait a bit for the list to refresh
     await page.waitForTimeout(1000)
 
-    // Check if transaction appears in the list
-    await expect(page.getByText(new RegExp(uniqueAmount.replace('.', '\\.')))).toBeVisible()
+    // Check if transaction appears in the list (use +$ prefix to distinguish from balance)
+    await expect(page.getByText(`+$${uniqueAmount}`)).toBeVisible()
   })
 })
 
@@ -104,8 +81,7 @@ test.describe('Transaction Filtering', () => {
   test('should filter transactions by credit type', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions using nav link
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Create a credit transaction
@@ -137,8 +113,7 @@ test.describe('Transaction Filtering', () => {
   test('should filter transactions by debit type', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions using nav link
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Create a credit transaction
@@ -170,8 +145,7 @@ test.describe('Transaction Filtering', () => {
   test('should show all transactions when "All" filter is selected', async ({ authenticatedPage }) => {
     const page = authenticatedPage
 
-    // Navigate to transactions using nav link
-    await page.getByRole('link', { name: 'Transactions', exact: true }).click()
+    // User is already on transactions page after login
     await expect(page).toHaveURL('/transactions')
 
     // Create transactions

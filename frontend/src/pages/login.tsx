@@ -23,7 +23,7 @@ export function LoginPage() {
   const { login } = useAuth()
   const [error, setError] = useState<string | null>(null)
 
-  const from = location.state?.from?.pathname || '/dashboard'
+  const from = location.state?.from?.pathname || '/transactions'
 
   const {
     register,

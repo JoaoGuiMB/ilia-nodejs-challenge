@@ -144,7 +144,7 @@ describe('LoginPage', () => {
     })
   })
 
-  it('should navigate to dashboard on successful login', async () => {
+  it('should navigate to transactions on successful login', async () => {
     const user = userEvent.setup()
     const mockResponse = {
       user: { id: '1', first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
@@ -168,7 +168,7 @@ describe('LoginPage', () => {
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
+      expect(mockNavigate).toHaveBeenCalledWith('/transactions', { replace: true })
     })
   })
 

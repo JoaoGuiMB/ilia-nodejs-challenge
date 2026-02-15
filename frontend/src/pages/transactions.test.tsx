@@ -8,6 +8,9 @@ import { TransactionsPage } from './transactions'
 
 const mockFetch = vi.fn()
 
+const TRANSACTIONS_URL = 'http://localhost:3001/transactions'
+const BALANCE_URL = 'http://localhost:3001/balance'
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -53,6 +56,57 @@ const mockTransactions = [
   },
 ]
 
+const mockBalanceResponse = { amount: 250 }
+
+function setupMockFetch(options: {
+  transactions?: typeof mockTransactions | [];
+  balance?: { amount: number };
+  transactionError?: boolean;
+  balanceError?: boolean;
+} = {}) {
+  const {
+    transactions = mockTransactions,
+    balance = mockBalanceResponse,
+    transactionError = false,
+    balanceError = false,
+  } = options
+
+  mockFetch.mockImplementation((url: string) => {
+    if (url.includes('/balance')) {
+      if (balanceError) {
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          json: () => Promise.resolve({ message: 'Balance fetch failed' }),
+        })
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(balance),
+      })
+    }
+
+    if (url.includes('/transactions')) {
+      if (transactionError) {
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          json: () => Promise.resolve({ message: 'Server error' }),
+        })
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(transactions),
+      })
+    }
+
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({}),
+    })
+  })
+}
+
 describe('TransactionsPage', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -67,10 +121,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render page title and description', () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
+    setupMockFetch({ transactions: [] })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -79,10 +130,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render loading state initially', () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
+    setupMockFetch({ transactions: [] })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -90,10 +138,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render transaction list after loading', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockTransactions),
-    })
+    setupMockFetch()
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -107,10 +152,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render empty state when no transactions', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
+    setupMockFetch({ transactions: [] })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -122,11 +164,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render error state on API failure', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      json: () => Promise.resolve({ message: 'Server error' }),
-    })
+    setupMockFetch({ transactionError: true })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -136,10 +174,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render filter controls', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockTransactions),
-    })
+    setupMockFetch()
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -154,18 +189,26 @@ describe('TransactionsPage', () => {
 
   it('should filter transactions when clicking filter buttons', async () => {
     const user = userEvent.setup()
-
     const creditOnly = mockTransactions.filter(t => t.type === 'CREDIT')
 
-    mockFetch
-      .mockResolvedValueOnce({
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('/balance')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockBalanceResponse),
+        })
+      }
+      if (url.includes('type=CREDIT')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(creditOnly),
+        })
+      }
+      return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockTransactions),
       })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(creditOnly),
-      })
+    })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -185,10 +228,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should render transaction form', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
+    setupMockFetch({ transactions: [] })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -202,10 +242,7 @@ describe('TransactionsPage', () => {
   })
 
   it('should have form with correct initial values', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
+    setupMockFetch({ transactions: [] })
 
     render(<TransactionsPage />, { wrapper: createWrapper() })
 
@@ -221,5 +258,108 @@ describe('TransactionsPage', () => {
     // Hidden type input should be CREDIT by default
     const hiddenInput = document.querySelector('input[name="type"]') as HTMLInputElement
     expect(hiddenInput.value).toBe('CREDIT')
+  })
+
+  // Balance Card Tests
+  describe('Balance Display', () => {
+    it('should render balance card with correct amount', async () => {
+      setupMockFetch({ balance: { amount: 1500.50 } })
+
+      render(<TransactionsPage />, { wrapper: createWrapper() })
+
+      await waitFor(() => {
+        expect(screen.getByText('$1,500.50')).toBeInTheDocument()
+      })
+
+      expect(screen.getByText('Current Balance')).toBeInTheDocument()
+    })
+
+    it('should show loading state for balance while fetching', () => {
+      // Mock a delayed balance response
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/balance')) {
+          return new Promise(() => {})
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        })
+      })
+
+      render(<TransactionsPage />, { wrapper: createWrapper() })
+
+      expect(screen.getByText('Loading your balance...')).toBeInTheDocument()
+    })
+
+    it('should show error state for balance with retry button', async () => {
+      setupMockFetch({ balanceError: true, transactions: [] })
+
+      render(<TransactionsPage />, { wrapper: createWrapper() })
+
+      await waitFor(() => {
+        expect(screen.getByText('Balance fetch failed')).toBeInTheDocument()
+      })
+
+      expect(screen.getByRole('button', { name: 'Try Again' })).toBeInTheDocument()
+    })
+
+    it('should retry fetching balance when retry button is clicked', async () => {
+      const user = userEvent.setup()
+      let balanceCallCount = 0
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/balance')) {
+          balanceCallCount++
+          if (balanceCallCount === 1) {
+            return Promise.resolve({
+              ok: false,
+              status: 500,
+              json: () => Promise.resolve({ message: 'Balance fetch failed' }),
+            })
+          }
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ amount: 500 }),
+          })
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        })
+      })
+
+      render(<TransactionsPage />, { wrapper: createWrapper() })
+
+      await waitFor(() => {
+        expect(screen.getByText('Balance fetch failed')).toBeInTheDocument()
+      })
+
+      const retryButton = screen.getByRole('button', { name: 'Try Again' })
+      await user.click(retryButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('$500.00')).toBeInTheDocument()
+      })
+    })
+
+    it('should display correct balance amount with formatting', async () => {
+      setupMockFetch({ balance: { amount: 12345.67 } })
+
+      render(<TransactionsPage />, { wrapper: createWrapper() })
+
+      await waitFor(() => {
+        expect(screen.getByText('$12,345.67')).toBeInTheDocument()
+      })
+    })
+
+    it('should display zero balance correctly', async () => {
+      setupMockFetch({ balance: { amount: 0 } })
+
+      render(<TransactionsPage />, { wrapper: createWrapper() })
+
+      await waitFor(() => {
+        expect(screen.getByText('$0.00')).toBeInTheDocument()
+      })
+    })
   })
 })
